@@ -23,15 +23,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+//Typedefs and Structs//
+typedef char arr_t[30][20];		//2D array to hold formatted timestamps
+
 /**
  * @struct BST
- * @brief Struct for the BST
+ * @brief Node struct for the BST
  */
- 
 typedef struct listNode{
 	float temperature;
 	float humidity;
 	char * Ftime;
+	time_t UFtime;
 	struct listNode* left;
 	struct listNode* right;
 }listNode_t, *listNodePTR_t;
@@ -67,7 +71,7 @@ struct tm nov_time = {0};
  * 
  * 
  */
-listNodePTR_t create_tree(char * buffer, float temp, float hum);
+listNodePTR_t create_tree(char * buffer, time_t UFtime, float temp, float hum);
 
 
 /**
@@ -81,7 +85,7 @@ listNodePTR_t create_tree(char * buffer, float temp, float hum);
  * 
  * 
  */
-listNodePTR_t add_leaf(listNodePTR_t nodePTR, char * buffer, float temperature, float humidity);
+listNodePTR_t add_leaf(listNodePTR_t nodePTR, char * buffer, time_t UFtime, float temperature, float humidity);
 
 
 /**
@@ -107,7 +111,7 @@ listNodePTR_t search_tree(listNodePTR_t nodePTR, char * buffer);
  * @details Visits each node, prints the temp, humidity, and time data to stdout
  *			Time data is formated to be human readable via strftime function (provided in time.h standard library)
  */
-void print_inOrder(listNodePTR_t nodePTR);
+//void print_inOrder(listNodePTR_t nodePTR);
 
 
 /**

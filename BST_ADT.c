@@ -18,45 +18,66 @@
 #include "BST_Helper.h"
 
 //CREATE BST
-listNodePTR_t create_tree(char * buffer, float temp, float hum) { //generate root node if it does not exist
+listNodePTR_t create_tree(char * buffer, time_t Rtm, float temp, float hum) { //generate root node if it does not exist
+
+	//printf("DEBUG(create_tree): \t%s\t\n", *buffer);
     listNodePTR_t root = (listNodePTR_t)malloc(sizeof(listNode_t)); //alloc mem block of size listNode, cast to listNode ptr and assign to root
 	if(!root){
 		printf("Could not allocate memory... Terminating application...\n");
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 	
 	//set root node values
     root->Ftime = buffer;
+	root->UFtime = Rtm;
     root->temperature = temp;
     root->humidity = hum;
     root->left = NULL;
     root->right = NULL;
 	
-								printf("DEBUG(create_tree): Successfully created BST\n");
+								//printf("DEBUG(create_tree): Successfully created BST\n");
     return root;
+
+	
 }
 
-//INSERT NODE
-listNodePTR_t add_leaf(listNodePTR_t nodePTR, char * buffer, float temp, float hum) {
+//ISSUE OCCURS HERE/////////////////////////////////////////////////////// buffer not passed correctly
+
+listNodePTR_t add_leaf(listNodePTR_t nodePTR, char * buffer, time_t Rtm, float temp, float hum) {
+	
+	
     
     if (!nodePTR) { 								// If the tree is empty, calls create tree function, creates and returns root node
-        nodePTR = create_tree(buffer, temp, hum);
-		printf("DEBUG(add_leaf): Generated new Binary Search Tree.\n");
+        nodePTR = create_tree(buffer, Rtm, temp, hum);
+		//add_leaf(nodePTR, buffer, Rtm, temp, hum);
 		return nodePTR;
     }
-	
+	else{
 		listNodePTR_t new_node = (listNodePTR_t)malloc(sizeof(listNode_t));
+		if(!new_node){
+			printf("Could not allocate memory... Terminating application...\n");
+			exit(EXIT_FAILURE);
+		}
+	
 		new_node->Ftime = buffer;
+		new_node->UFtime = Rtm;
 		new_node->temperature = temp;
 		new_node->humidity = hum;
 		new_node->left = NULL;
 		new_node->right = NULL;
+	}
 	
 	
-    if ((new_node->Ftime) < (nodePTR->Ftime))  //insert left if timestamp is earlier than current node
-        nodePTR->left = new_node;
-	else if ((new_node->Ftime) > (nodePTR->Ftime))//insert right if greater
-		nodePTR->right = add_leaf(new_node, buffer, temp, hum);
+	
+	
+	if (Rtm > nodePTR->UFtime) {  // Insert into the left subtree
+        nodePTR->left = add_leaf(nodePTR->left, buffer, Rtm, temp, hum);
+    } else if (Rtm < nodePTR->UFtime) {  // Insert into the right subtree
+        nodePTR->right = add_leaf(nodePTR->right, buffer, Rtm, temp, hum);
+    } else {
+        printf("DEBUG(add_leaf): Duplicate timestamp encountered, ignoring: %s\n", buffer);
+    }
+
 	
     return nodePTR;
 }
@@ -84,24 +105,6 @@ listNodePTR_t search_tree(listNodePTR_t nodePTR, char * buffer){
 		
 }
 
-//PRINT ALL NODES IN ORDER
-/*void print_inOrder(listNodePTR_t nodePTR){
-
-	if(!nodePTR){ 
-		//printf("Nothing to print... returning...\n");
-		return;
-	}
-	
-	print_inOrder(nodePTR->left);
-	
-	char time_buffer[30];  // Array to hold formatted time value
-    //struct tm *time = localtime(&nodePTR->timestamp);  // Convert time_t to struct tm using time.h lib function
-    strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S", time); //formats time into readable stringf
-	
-	
-	printf("Temperature:\t %.2f °C\t Humidity:\t %.2f%%\t Timestamp: \t%s\t\n", nodePTR->temperature, nodePTR->humidity, time_buffer);
-	print_inOrder(nodePTR->right);   
-}*/
 
 //Shuffles Array Values
 void shuffle_array(ValsPTR_t arrptr, int arrsize){
@@ -122,7 +125,7 @@ void shuffle_array(ValsPTR_t arrptr, int arrsize){
 }
 	
 	
-/*void getUI(listNodePTR_t nodePTR){
+void getUI(listNodePTR_t nodePTR){
 	
 	//greet user
 	//while user does not enter escape char, continue prompting after each entry
@@ -131,6 +134,20 @@ void shuffle_array(ValsPTR_t arrptr, int arrsize){
 	//print all data for that node
 	//reprompt user
 	
-}*/
+}
+
+//DEBUG: PRINT ALL NODES IN ORDER
+void print_inOrder(listNodePTR_t nodePTR){
+
+	if(!nodePTR){ 
+		return;
+	}
 	
+	print_inOrder(nodePTR->left);
+	
+	printf("Temperature: %.2f °C\t Humidity: %.2f%%\t Timestamp: %s\n", nodePTR->temperature, nodePTR->humidity, nodePTR->Ftime);
+	
+	//printf("Temperature:\t %.2f °C\t Humidity:\t %.2f%%\t Timestamp: \t%s\t\n", nodePTR->temperature, nodePTR->humidity, time_buffer);
+	print_inOrder(nodePTR->right);   
+}
 	
