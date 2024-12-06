@@ -19,13 +19,14 @@
 	
 int main() {
 	
-	arr_t Tstamps;
+	arr_t Tstamps = {0};
 	int rtn_code;
 	uint32_t *io_base;
 	Vals_t store_entries[29];
 	uint32_t temp_value;
 	uint32_t humid_value;
-	char time_buffer[29] = {0};
+	char time_buffer[30];
+	
 	
 	//Initialize struct tm with data collection start date
 	nov_time.tm_year = 124;  		// Years since 1900
@@ -75,7 +76,7 @@ int main() {
 	listNodePTR_t BST = NULL; //declare PTR to BST. init to NULL jic
 	time_t nov_rawtm = mktime(&nov_time); //converts data from nov_time struct into time_t value
 	
-    for (int day = 0; day <= 30; day++) { 
+    for (int day = 0; day <= 29; ++day) { 
 
 		//SET SENSOR EACH LOOP PASSING RESTRICTED RANGE//
         _iom361_setSensor1_rndm(temp_low, temp_hi, humid_low, humid_hi);
@@ -114,14 +115,24 @@ int main() {
 			
 		store_entries[day].temperature = temp_value;
 		store_entries[day].humidity = humid_value;
-		if(day <=1)
-			store_entries[day].rawtm = (nov_rawtm + (day*DAY_SECONDS)) - 3600; //subtract an hour to account for DST
-		else
-			store_entries[day].rawtm = nov_rawtm + (day*DAY_SECONDS); //increments time by 1 day for each reading
-		store_entries[day].ftimestamp = localtime(&store_entries[day].rawtm); //converts into struct tm*
-		strftime(&Tstamps[day][0], sizeof(time_buffer), "%m-%d-%Y %H:%M:%S", store_entries[day].ftimestamp); //accepts tm struct and inserts formatted string into array of timestamps
 		
-		//printf("DEBUG(collection): %s\n", &Tstamps[day][0]);
+///ISSUES HERE: SOMETHING WRONG WITH INSERTION ALG		
+		
+		if(day <=1){
+			store_entries[day].rawtm = (nov_rawtm + (day*DAY_SECONDS)) - 3600; //subtract an hour to account for DST
+			//printf("DEBUG(Tstamps): %s\n", Tstamps[day]); //PTR to first element of CharArr array?
+			
+		}
+		else{
+			store_entries[day].rawtm = (nov_rawtm + (day*DAY_SECONDS)); //increments time by 1 day for each reading
+			//printf("DEBUG(Tstamps): %s\n", Tstamps[day]);
+		}
+		
+		store_entries[day].ftimestamp = localtime(&store_entries[day].rawtm); //converts into struct tm*
+		
+		strftime(Tstamps[day], sizeof(time_buffer), "%m-%d-%Y %H:%M:%S", store_entries[day].ftimestamp); //accepts tm struct and inserts formatted string into array of timestamps
+		printf("DEBUG(Tstamps (%d total): %s\n", day+1, Tstamps[day]);
+		
 		
 	}//END DATA COLLECTION
 	
@@ -129,7 +140,9 @@ int main() {
 //STATUS: store_entries arrays now has a struct holding raw time, temp, and humidity for each day (IN ORDER OF TIMESTAMP) //
 //printf("DEBUG(checkpoint): CAPTURED SENSOR DATA\n\n");
 //////////////////////////////////////////////////////////
-	
+
+
+
 	//randomize values in array
 	shuffle_array(store_entries, 30);
 	
@@ -139,12 +152,12 @@ int main() {
 //printf("DEBUG(checkpoint): SHUFFLED DATA\n\n");
 //////////////////////////////////////////////////////////
 
+
+
 //WORKBENCH//
 /////////////////////////////
 
-	
-
-
+/*
 	//insert into BST
 	for(int i = 0; i<30; ++i){
 			
@@ -155,9 +168,9 @@ int main() {
 		
 	}
 	
-	print_inOrder(BST);
+	//print_inOrder(BST);
 
-		
+	*/	
 		
 		
 /////////////////////////////////
